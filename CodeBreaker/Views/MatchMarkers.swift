@@ -33,17 +33,24 @@ struct MatchMarkers: View {
         }
     }
     
+    @ViewBuilder
     func matchMarker(peg: Int) -> some View {
         
-        let exactCount: Int = matches.count(where: {match in match == .exact})
-        let foundCount: Int = matches.count(where: {match in match != .nomatch})
+//        let exactCount: Int = matches.count(where: isExact )
+//        let exactCount: Int = matches.count(where: { match in match == .match } )
+        let exactCount: Int = matches.count { $0 == .exact }
+        let foundCount = matches.count { $0 != .nomatch }
         
-        return Circle()
+        Circle()
             .fill(exactCount > peg ? .black : .clear)
             .strokeBorder(foundCount > peg ? Color.primary : .clear, lineWidth: 3)
             .aspectRatio(1, contentMode: .fit)
         
     }
+    
+//    func isExact(match: Match) -> Bool {
+//        match == .exact
+//    }
 }
 
 #Preview {
