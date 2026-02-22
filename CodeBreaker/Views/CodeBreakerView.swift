@@ -11,62 +11,60 @@ import SwiftUI
 
 struct CodeBreakerView: View {
     
-    @State var game = CodeBreaker(pegChoices: [.brown, .yellow, .orange, .black])
+    // MARK: Data Owned by me
+    @State private var game = CodeBreaker(pegChoices: [.brown, .yellow, .orange, .black, .green])
+    @State private var selection: Int = 0
     
+    // MARK: - body
     var body: some View {
         VStack {
-            view(for: game.masterCode)
+                view(for: game.masterCode)
             ScrollView {
-                view(for: game.guess)
+                if !game.isOver {
+                    view(for: game.guess)
+                }
                 ForEach(game.attempts.indices.reversed(), id:\.self) { index in
                     view(for: game.attempts[index])
                 }
             }
+            if game.isOver {
+                restartButton
+            }
             
-            
-            
+            PegChooser(choices: game.pegChoices) { peg in
+                game.setGuessPeg(peg, at: selection)
+                selection = (selection + 1) % game.masterCode.pegs.count
+            }
         }
         .padding()
     }
     
+
+    
     var restartButton: some View {
         Button("Restart") {
-            
+            game.resetGame()
         }
-        .font(.system(size: 80))
-        .minimumScaleFactor(0.1)
+        .font(.system(size: 50))
+        .minimumScaleFactor(GuessButton.scaleFactor)
+        .buttonStyle(.borderedProminent)
+        .tint(Color.orange.opacity(0.7))
     }
     
     var guessButton: some View {
         Button("Guess") {
             withAnimation {
                 game.attemptGuess()
+                selection = 0
             }
         }
-        .font(.system(size: 80))
-        .minimumScaleFactor(0.1)
+        .font(.system(size: GuessButton.maximumFontSize))
+        .minimumScaleFactor(GuessButton.scaleFactor)
     }
     
     func view(for code: Code) -> some View {
         HStack {
-            ForEach(code.pegs.indices, id: \.self) { index in
-                RoundedRectangle(cornerRadius: 10)
-                    .overlay {
-                        if code.pegs[index] == Code.missing {
-                            RoundedRectangle(cornerRadius: 10)
-                                .strokeBorder(.gray)
-                        }
-                    }
-                    .contentShape(Rectangle())
-                    .aspectRatio(1, contentMode: .fit)
-                    .foregroundStyle(code.pegs[index])
-                    .onTapGesture {
-                        if code.kind == .guess {
-                            game.changeGuessPeg(at: index)
-                        }
-                    }
-                
-            }
+            CodeView(code: code, selection: $selection)
             Rectangle()
                 .foregroundStyle(.clear)
                 .aspectRatio(1, contentMode: .fit)
@@ -77,13 +75,24 @@ struct CodeBreakerView: View {
                         if code.kind == .guess {
                             guessButton
                         }
-                        if code.kind == .master {
-                            restartButton
-                        }
                     }
                 }
             
         }
+    }
+    
+    struct GuessButton {
+        static let minimumFontSize: CGFloat = 8
+        static let maximumFontSize: CGFloat = 80
+        static let scaleFactor = minimumFontSize / maximumFontSize
+    }
+    
+
+}
+
+extension Color {
+    static func gray(_ brightness: CGFloat) -> Color {
+        return Color(hue: 148/360, saturation: 0, brightness: brightness)
     }
 }
 
