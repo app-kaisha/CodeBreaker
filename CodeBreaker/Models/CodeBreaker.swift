@@ -20,16 +20,14 @@ struct CodeBreaker {
     init(pegChoices: [Peg] = [.red, .green, .yellow, .blue]) {
         self.pegChoices = pegChoices
         masterCode.randomise(from: pegChoices)
-        print(masterCode)
     }
     
     var isOver: Bool {
         attempts.last?.pegs == masterCode.pegs
     }
     
-    mutating func resetGame() {
+    mutating func restart() {
         masterCode.randomise(from: pegChoices)
-        print(masterCode)
         masterCode.kind = .master(isHidden: true)
         guess = Code(kind: .guess)
         attempts = []

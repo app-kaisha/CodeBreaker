@@ -18,6 +18,9 @@ struct CodeView<AncillaryView>: View where AncillaryView: View {
     @ViewBuilder
     let ancillaryView: () -> AncillaryView
     
+    // MARK: - Data owned by me
+    @Namespace private var selectionNamespace
+    
     init(
         code: Code,
         selection: Binding<Int> = .constant(-1),
@@ -34,15 +37,28 @@ struct CodeView<AncillaryView>: View where AncillaryView: View {
             ForEach(code.pegs.indices, id: \.self) { index in
                 PegView(peg: code.pegs[index])
                     .padding(Selection.border)
-                    .background {
-                        if selection == index, code.kind == .guess {
-                            Selection.shape
-                                .foregroundStyle(Selection.colour)
+                    .background { // Selection background
+                        Group {
+                            if selection == index, code.kind == .guess {
+                                Selection.shape
+                                    .foregroundStyle(Selection.colour)
+                                    .matchedGeometryEffect(id: "selection", in: selectionNamespace)
+                            }
                         }
+                        .animation(.selection, value: selection)
                     }
-                    .overlay {
+                    
+                    .overlay { // Hidden code obscuring
                         Selection.shape
                             .foregroundStyle(code.isHidden ? Color.gray : Color.clear)
+                        // supress animation so transition time doesn't revela code
+                            //.animation(nil, value: code.isHidden)
+                        // alternate animation when showing, and none when hiding
+                            .transaction { transaction in
+                                if code.isHidden {
+                                    transaction.animation = nil
+                                }
+                            }
                     }
                     .onTapGesture {
                         if code.kind == .guess {
