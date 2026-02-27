@@ -10,7 +10,8 @@ import SwiftUICore
 
 typealias Peg = Color
 
-struct CodeBreaker {
+@Observable
+class CodeBreaker{
     
     var name: String
     var masterCode: Code = Code(kind: .master(isHidden: true))
@@ -31,7 +32,7 @@ struct CodeBreaker {
         attempts.first?.pegs == masterCode.pegs
     }
     
-    mutating func restart() {
+    func restart() {
         masterCode.randomise(from: pegChoices)
         masterCode.kind = .master(isHidden: true)
         guess = Code(kind: .guess)
@@ -41,7 +42,7 @@ struct CodeBreaker {
         
     }
     
-    mutating func attemptGuess() {
+    func attemptGuess() {
         // prohibit duplicating peg guesses, keeping identifiable attempts and so always in correct order
         guard !attempts.contains(where: { $0.pegs == guess.pegs }) else { return }
         
@@ -55,12 +56,12 @@ struct CodeBreaker {
         }
     }
     
-    mutating func setGuessPeg(_ peg: Peg, at index: Int) {
+    func setGuessPeg(_ peg: Peg, at index: Int) {
         guard guess.pegs.indices.contains(index) else { return }
         guess.pegs[index] = peg
     }
     
-    mutating func changeGuessPeg(at index: Int) {
+    func changeGuessPeg(at index: Int) {
         let existingPeg = guess.pegs[index]
         
         if let indexOfExistingInPegChoicesArray = pegChoices.firstIndex(of: existingPeg) {
@@ -73,6 +74,17 @@ struct CodeBreaker {
         
     }
     
+}
+
+extension CodeBreaker: Identifiable, Hashable  {
+    
+    static func == (lhs: CodeBreaker, rhs: CodeBreaker) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }
 
 
