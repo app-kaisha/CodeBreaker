@@ -9,13 +9,13 @@
 
 import SwiftUICore
 
-struct Code: Equatable {
+struct Code: Hashable {
     var kind: Kind
     var pegs: [Peg] = Array(repeating: Code.missingPeg, count: 4)
     
     static let missingPeg: Peg = .clear
     
-    enum Kind: Equatable {
+    enum Kind: Hashable, Equatable {
         case master(isHidden: Bool)
         case guess
         case attempt([Match])
