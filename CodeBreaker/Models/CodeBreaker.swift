@@ -12,6 +12,7 @@ typealias Peg = Color
 
 struct CodeBreaker {
     
+    var name: String
     var masterCode: Code = Code(kind: .master(isHidden: true))
     var guess: Code = Code(kind: .guess)
     var attempts: [Code] = []
@@ -20,8 +21,9 @@ struct CodeBreaker {
     var startTime: Date = .now
     var endTime: Date?
     
-    init(pegChoices: [Peg] = [.red, .green, .yellow, .blue]) {
+    init(name: String = "Code Breaker", pegChoices: [Peg] = [.red, .green, .yellow, .blue]) {
         self.pegChoices = pegChoices
+        self.name = name
         masterCode.randomise(from: pegChoices)
     }
     

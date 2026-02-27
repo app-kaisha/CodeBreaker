@@ -11,9 +11,10 @@ import SwiftUI
 
 struct CodeBreakerView: View {
     
-    // MARK: Data Owned by me
-    @State private var game = CodeBreaker(pegChoices: [.brown, .yellow, .orange, .black, .green])
+    // MARK: Data Shared with me
+    @Binding var game: CodeBreaker
     
+    // MARK: Data Owned by me
     @State private var selection: Int = 0
     @State private var restarting = false
     @State private var hideMostRecentMarkers = false
@@ -21,15 +22,7 @@ struct CodeBreakerView: View {
     // MARK: - body
     var body: some View {
         VStack {
-            
-            Button("Restart", systemImage: "arrow.circlepath", action: restart)
-            
-            CodeView(code: game.masterCode) {
-                ElapsedTime(startTime: game.startTime, endTime: game.endTime)
-                    .flexibleSystemFont()
-                    .monospaced()
-                    .lineLimit(1)
-            }
+            CodeView(code: game.masterCode)
             ScrollView {
                 if !game.isOver {
                     CodeView(code: game.guess, selection: $selection) {
@@ -40,7 +33,7 @@ struct CodeBreakerView: View {
                     .opacity(restarting ? 0 : 1)
                     
                 }
-                ForEach(game.attempts, id:\.self) { attempt in
+                ForEach(game.attempts, id: \.pegs) { attempt in
                     CodeView( code: attempt) {
                         let showMarkers = !hideMostRecentMarkers || attempt.pegs != game.attempts.first?.pegs
                         if showMarkers, let matches = attempt.matches  {
@@ -54,6 +47,17 @@ struct CodeBreakerView: View {
                 PegChooser(choices: game.pegChoices, onChoose: changePegAtSelection)
                     .transition(.pegChooser)
             }
+        }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button("Restart", systemImage: "arrow.circlepath", action: restart)
+            }
+            ToolbarItem {
+                ElapsedTime(startTime: game.startTime, endTime: game.endTime)
+                    .monospaced()
+                    .lineLimit(1)
+            }
+            
         }
         .padding()
     }
@@ -94,5 +98,8 @@ struct CodeBreakerView: View {
 }
 
 #Preview {
-    CodeBreakerView()
+    @Previewable @State var game = CodeBreaker(name: "Preview", pegChoices: [.blue, .red, .orange])
+    NavigationStack {
+        CodeBreakerView(game: $game)
+    }
 }

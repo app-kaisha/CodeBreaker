@@ -14,7 +14,7 @@ struct PegChooser: View {
     let choices: [Peg]
     
     // MARK: Data Out Function
-    let onChoose: ((Peg) -> Void)?
+    var onChoose: ((Peg) -> Void)?
 
     // MARK: - Body
     var body: some View {
@@ -32,6 +32,9 @@ struct PegChooser: View {
     }
 }
 
-//#Preview {
-//    PegChooser(game: <#Binding<CodeBreaker>#>, selection: <#Binding<Int>#>)
-//}
+#Preview {
+    PegChooser(choices: [Color.red, .blue, .green, .yellow]) { peg in
+        print("chose \(peg)")
+    }
+    .padding()
+}
