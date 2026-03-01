@@ -6,7 +6,7 @@
 //  Copyright © 2026 app-kaihatsusha. All rights reserved.
 //
 
-import SwiftUICore
+import SwiftUI
 
 typealias Peg = Color
 
