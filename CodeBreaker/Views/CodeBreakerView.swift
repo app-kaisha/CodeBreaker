@@ -11,6 +11,9 @@ import SwiftUI
 
 struct CodeBreakerView: View {
     
+    //MARK: - Data In
+    @Environment(\.scenePhase) var scenePhase
+    
     // MARK: Data Shared with me
     let game: CodeBreaker
     
@@ -49,12 +52,30 @@ struct CodeBreakerView: View {
                     .frame(maxHeight: 90)
             }
         }
+        .onAppear {
+            game.startTimer()
+        }
+        .onDisappear {
+            game.pauseTimer()
+        }
+        .onChange(of: game) { oldGame, newGame in
+            oldGame.pauseTimer()
+            newGame.startTimer()
+        }
+        .onChange(of: scenePhase) {
+            switch scenePhase {
+            case .active: game.startTimer()
+            case .background: game.pauseTimer()
+            default: break
+                
+            }
+        }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button("Restart", systemImage: "arrow.circlepath", action: restart)
             }
             ToolbarItem {
-                ElapsedTime(startTime: game.startTime, endTime: game.endTime)
+                ElapsedTime(startTime: game.startTime, endTime: game.endTime, elapsedTime: game.elapsedTime)
                     .monospaced()
                     .lineLimit(1)
             }
