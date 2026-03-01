@@ -11,7 +11,7 @@ import SwiftUI
 
 struct CodeBreakerView: View {
     
-    //MARK: - Data In
+    // MARK: - Data In
     @Environment(\.scenePhase) var scenePhase
     
     // MARK: Data Shared with me
@@ -30,7 +30,7 @@ struct CodeBreakerView: View {
                 if !game.isOver {
                     CodeView(code: game.guess, selection: $selection) {
                         Button("Guess", action: guess).flexibleSystemFont()
-                            
+                        
                     }
                     .animation(nil, value: game.attempts.count)
                     .opacity(restarting ? 0 : 1)
@@ -52,24 +52,7 @@ struct CodeBreakerView: View {
                     .frame(maxHeight: 90)
             }
         }
-        .onAppear {
-            game.startTimer()
-        }
-        .onDisappear {
-            game.pauseTimer()
-        }
-        .onChange(of: game) { oldGame, newGame in
-            oldGame.pauseTimer()
-            newGame.startTimer()
-        }
-        .onChange(of: scenePhase) {
-            switch scenePhase {
-            case .active: game.startTimer()
-            case .background: game.pauseTimer()
-            default: break
-                
-            }
-        }
+        .trackElapsedTimeInGame(in: game)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button("Restart", systemImage: "arrow.circlepath", action: restart)
@@ -86,9 +69,9 @@ struct CodeBreakerView: View {
     
     
     func changePegAtSelection(to peg: Peg) {
-            game.setGuessPeg(peg, at: selection)
-            selection = (selection + 1) % game.masterCode.pegs.count
-
+        game.setGuessPeg(peg, at: selection)
+        selection = (selection + 1) % game.masterCode.pegs.count
+        
     }
     
     func restart() {
@@ -117,6 +100,42 @@ struct CodeBreakerView: View {
         }
     }
     
+}
+
+extension View {
+    func trackElapsedTimeInGame(in game: CodeBreaker) -> some View {
+        self.modifier(ElapsedTimeTracker(game: game))
+    }
+}
+
+struct ElapsedTimeTracker: ViewModifier {
+    
+    // MARK: - Data In
+    @Environment(\.scenePhase) var scenePhase
+    
+    let game: CodeBreaker
+    
+    func body(content: Content) -> some View {
+        content
+            .onAppear {
+                game.startTimer()
+            }
+            .onDisappear {
+                game.pauseTimer()
+            }
+            .onChange(of: game) { oldGame, newGame in
+                oldGame.pauseTimer()
+                newGame.startTimer()
+            }
+            .onChange(of: scenePhase) {
+                switch scenePhase {
+                case .active: game.startTimer()
+                case .background: game.pauseTimer()
+                default: break
+                    
+                }
+            }
+    }
 }
 
 #Preview {

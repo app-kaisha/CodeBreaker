@@ -21,7 +21,7 @@ struct ElapsedTime: View {
     }
     
     var body: some View {
-        if let startTime {
+        if startTime != nil {
             if let endTime {
                 Text(endTime, format: format)
             } else {
