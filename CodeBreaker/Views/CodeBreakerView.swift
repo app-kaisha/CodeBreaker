@@ -108,6 +108,17 @@ extension View {
     }
 }
 
+extension CodeBreaker {
+    convenience init(name: String = "Code Breaker", pegChoices: [Color]) {
+        self.init(name: name, pegChoices: pegChoices.map { $0.hex })
+    }
+    
+    var pegColourChoices: [Color] {
+        get { pegChoices.map { Color(hex: $0) ?? .clear }}
+        set { pegChoices = newValue.map { $0.hex }}
+    }
+}
+
 struct ElapsedTimeTracker: ViewModifier {
     
     // MARK: - Data In

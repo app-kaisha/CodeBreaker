@@ -49,6 +49,7 @@ struct CodeView<AncillaryView>: View where AncillaryView: View {
                     }
                     
                     .overlay { // Hidden code obscuring
+                        let _ = print("code kind: \(code.kind)")
                         Selection.shape
                             .foregroundStyle(code.isHidden ? Color.gray : Color.clear)
                         // supress animation so transition time doesn't revela code

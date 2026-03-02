@@ -8,20 +8,25 @@
 
 
 import SwiftUI
+import SwiftData
 
-struct Code {
+@Model
+class Code {
     
-    var kind: Kind
-    var pegs: [Peg] = Array(repeating: Code.missingPeg, count: 4)
-    
-    static let missingPeg: Peg = .clear
-    
-    enum Kind: Equatable {
-        case master(isHidden: Bool)
-        case guess
-        case attempt([Match])
-        case unknown
+    var _kind: String = Kind.unknown.description
+    var kind: Kind {
+        get { return Kind(_kind)}
+        set { _kind = newValue.description }
     }
+    
+    var pegs: [Peg]
+    
+    init(kind: Kind, pegs: [Peg] = Array(repeating: Code.missingPeg, count: 4)) {
+        self.pegs = pegs
+        self.kind = kind
+    }
+    
+    static let missingPeg: Peg = ""
     
     var isHidden: Bool {
         switch kind {
@@ -30,14 +35,14 @@ struct Code {
         }
     }
     
-    mutating func randomise(from pegChoices: [Peg]) {
+    func randomise(from pegChoices: [Peg]) {
         for index in pegs.indices {
             pegs[index] = pegChoices.randomElement() ?? Code.missingPeg
         }
         print(self)
     }
     
-    mutating func reset() {
+    func reset() {
         pegs = Array(repeating: Code.missingPeg, count: 4)
     }
     
@@ -69,4 +74,10 @@ struct Code {
             }
         }
     }
+}
+
+enum Match: String {
+    case nomatch
+    case exact
+    case inexact
 }
