@@ -80,6 +80,7 @@ class CodeBreaker{
     func startTimer() {
         if startTime == nil, !isOver {
             startTime = .now
+            elapsedTime += 0.00001 // as transient on start time will not trigger ui update but this will
         }
     }
     

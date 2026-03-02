@@ -32,4 +32,5 @@ struct GameChooser: View {
 
 #Preview {
     GameChooser()
+        .modelContainer(for: CodeBreaker.self, inMemory: false)
 }
