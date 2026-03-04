@@ -7,16 +7,49 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct GameList: View {
     
+    //MARK: Data in
+    @Environment(\.modelContext) var modelContext
+    
     // MARK: Data shared with me
     @Binding var selection: CodeBreaker?
+    @Query private var games: [CodeBreaker]
     
     // MARK: Data owned by me
-    @State private var games: [CodeBreaker] = []
-    
     @State private var gameToEdit: CodeBreaker?
+    
+    init(sortBy: SortOption = .name, nameContains search: String = "", selection: Binding<CodeBreaker?>) {
+        _selection = selection
+        
+        let lowercaseSearch = search.lowercased()
+        let capitalisedSearch = search.capitalized
+        let upperCaseSearch = search.uppercased()
+        let predicate = #Predicate<CodeBreaker> { game in
+            search.isEmpty || game.name.contains(lowercaseSearch) || game.name.contains(capitalisedSearch) || game.name.contains(upperCaseSearch)
+        }
+        
+        switch sortBy {
+        case .name:
+            _games =  Query(filter: predicate, sort: \CodeBreaker.name, order: .reverse)
+        case .recent:
+            _games =  Query(filter: predicate, sort: \CodeBreaker.lastAttemptedDate, order: .forward)
+        }
+    }
+    
+    enum SortOption: CaseIterable {
+        case name
+        case recent
+        
+        var title: String {
+            switch self {
+            case .name: "Sort by Name"
+            case .recent: "Recent"
+            }
+        }
+    }
     
     var body: some View {
         List(selection: $selection) {
@@ -37,10 +70,9 @@ struct GameList: View {
                 }
             }
             .onDelete { offsets in
-                games.remove(atOffsets: offsets)
-            }
-            .onMove { offsets, destination in
-                games.move(fromOffsets: offsets, toOffset: destination)
+                for offset in offsets {
+                    modelContext.delete(games[offset])
+                }
             }
         }
         .onChange(of: games) {
@@ -75,11 +107,10 @@ struct GameList: View {
         if let gameToEdit {
             let copyOfGameToEdit = CodeBreaker(name: gameToEdit.name, pegChoices: gameToEdit.pegChoices)
             GameEditor(game: copyOfGameToEdit) {
-                if let index = games.firstIndex(of: gameToEdit) {
-                    games[index] = copyOfGameToEdit
-                } else {
-                    games.insert(copyOfGameToEdit, at: 0)
+                if games.contains(gameToEdit) {
+                    modelContext.delete(gameToEdit)
                 }
+                modelContext.insert(copyOfGameToEdit)
             }
         }
     }
@@ -93,13 +124,13 @@ struct GameList: View {
                 gameToEdit = nil
             }
         }
-
+        
     }
     
     func deleteButtonForGame(for game: CodeBreaker) -> some View {
         Button("Delete", systemImage: "minus.circle", role: .destructive) {
             withAnimation {
-                games.removeAll(where: { $0 == game })
+                modelContext.delete(game)
             }
         }
     }
@@ -111,17 +142,30 @@ struct GameList: View {
     }
     
     func addSampleGames() {
-        if games.isEmpty {
-            games.append(CodeBreaker(name: "Mastermind", pegChoices: [.red, .blue, .green,. yellow]))
-            games.append(CodeBreaker(name: "Earth Tones",pegChoices: [.orange, .brown, .black,. yellow, .green]))
-            games.append(CodeBreaker(name: "Undersea",pegChoices: [.blue, .indigo,. cyan]))
-            
-            selection = games.first
+        
+        //        let fetchDescriptor = FetchDescriptor<CodeBreaker>(
+        //            predicate: #Predicate { game in return true }
+        //        )
+        // does same as is Games.isempty
+        //        let fetchDescriptor = FetchDescriptor<CodeBreaker>(
+        //            predicate: .true,
+        //            sortBy: [.init(\.name)]
+        //        )
+        // sortBy: [SortDescriptor<CodeBreaker>.init(\.name)]
+        
+        // but as true is the default can be simply:
+        let fetchDescriptor = FetchDescriptor<CodeBreaker>()
+        if let results = try? modelContext.fetchCount(fetchDescriptor), results == 0 {
+            modelContext.insert(CodeBreaker(name: "Mastermind", pegChoices: [.red, .blue, .green,. yellow]))
+            modelContext.insert(CodeBreaker(name: "Earth Tones",pegChoices: [.orange, .brown, .black,. yellow, .green]))
+            modelContext.insert(CodeBreaker(name: "Undersea",pegChoices: [.blue, .indigo,. cyan]))
         }
+        
+        
     }
 }
 
-#Preview {
+#Preview(traits: .swiftData) {
     @Previewable @State var selection: CodeBreaker?
     
     NavigationStack {

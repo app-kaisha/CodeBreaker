@@ -20,6 +20,7 @@ class Code {
     }
     
     var pegs: [Peg]
+    var timestamp = Date.now
     
     init(kind: Kind, pegs: [Peg] = Array(repeating: Code.missingPeg, count: 4)) {
         self.pegs = pegs

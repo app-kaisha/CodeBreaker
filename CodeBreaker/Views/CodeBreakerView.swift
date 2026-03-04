@@ -149,10 +149,11 @@ struct ElapsedTimeTracker: ViewModifier {
     }
 }
 
-#Preview {
+//#Preview(traits: .modifier(SwiftDataPreview())) {
+#Preview(traits: .swiftData) {
     @Previewable @State var game = CodeBreaker(name: "Preview", pegChoices: [.blue, .red, .orange])
     NavigationStack {
         CodeBreakerView(game: game)
-            .modelContainer(for: CodeBreaker.self, inMemory: false)
+        
     }
 }
