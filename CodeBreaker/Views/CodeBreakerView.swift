@@ -102,11 +102,7 @@ struct CodeBreakerView: View {
     
 }
 
-extension View {
-    func trackElapsedTimeInGame(in game: CodeBreaker) -> some View {
-        self.modifier(ElapsedTimeTracker(game: game))
-    }
-}
+
 
 extension CodeBreaker {
     convenience init(name: String = "Code Breaker", pegChoices: [Color]) {
@@ -119,35 +115,7 @@ extension CodeBreaker {
     }
 }
 
-struct ElapsedTimeTracker: ViewModifier {
-    
-    // MARK: - Data In
-    @Environment(\.scenePhase) var scenePhase
-    
-    let game: CodeBreaker
-    
-    func body(content: Content) -> some View {
-        content
-            .onAppear {
-                game.startTimer()
-            }
-            .onDisappear {
-                game.pauseTimer()
-            }
-            .onChange(of: game) { oldGame, newGame in
-                oldGame.pauseTimer()
-                newGame.startTimer()
-            }
-            .onChange(of: scenePhase) {
-                switch scenePhase {
-                case .active: game.startTimer()
-                case .background: game.pauseTimer()
-                default: break
-                    
-                }
-            }
-    }
-}
+
 
 //#Preview(traits: .modifier(SwiftDataPreview())) {
 #Preview(traits: .swiftData) {
