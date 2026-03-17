@@ -63,6 +63,7 @@ struct CodeBreakerView: View {
             //.background(.yellow)
             
         }
+        .gesture(pegChoosingDial)
         .trackElapsedTimeInGame(in: game)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
@@ -78,6 +79,17 @@ struct CodeBreakerView: View {
         .padding()
     }
     
+    // Gesture
+    var pegChoosingDial: some Gesture {
+        RotateGesture()
+            .onChanged { value in
+                // cycle peg choice every 90 degrees of finger rotation on screen
+                
+                // TODO: protect for Nan cases
+                let pegChoiceIndex = Int(abs(value.rotation.degrees) / 90) % game.pegChoices.count
+                game.guess.pegs[selection] = game.pegChoices[pegChoiceIndex]
+            }
+    }
     
     func changePegAtSelection(to peg: Peg) {
         game.setGuessPeg(peg, at: selection)
