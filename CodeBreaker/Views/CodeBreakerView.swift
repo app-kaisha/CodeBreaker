@@ -13,6 +13,8 @@ struct CodeBreakerView: View {
     
     // MARK: - Data In
     @Environment(\.scenePhase) var scenePhase
+    // Access to scene size from app launch
+    @Environment(\.sceneFrame) var sceneFrame
     
     // MARK: Data Shared with me
     let game: CodeBreaker
@@ -46,11 +48,20 @@ struct CodeBreakerView: View {
                     .transition(.attempt(game.isOver))
                 }
             }
-            if !game.isOver {
-                PegChooser(choices: game.pegChoices, onChoose: changePegAtSelection)
-                    .transition(.pegChooser)
-                    .frame(maxHeight: 90)
+            
+            GeometryReader { geometry in
+                if !game.isOver {
+                    let offset = sceneFrame.maxY - geometry.frame(in: .global).minY
+                    PegChooser(choices: game.pegChoices, onChoose: changePegAtSelection)
+                        //.transition(.pegChooser)
+                        .transition(.offset(x: 0, y: offset))
+                        
+                }
             }
+            .aspectRatio(CGFloat(game.pegChoices.count), contentMode: .fit)
+            .frame(maxHeight: 90)
+            //.background(.yellow)
+            
         }
         .trackElapsedTimeInGame(in: game)
         .toolbar {

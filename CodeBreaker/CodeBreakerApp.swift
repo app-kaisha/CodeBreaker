@@ -13,8 +13,17 @@ import SwiftData
 struct CodeBreakerApp: App {
     var body: some Scene {
         WindowGroup {
-            GameChooser()
-                .modelContainer(for: CodeBreaker.self)
+            GeometryReader { geometry in
+                GameChooser()
+                    .modelContainer(for: CodeBreaker.self)
+                // inject geometry frame into all envrionments
+                    .environment(\.sceneFrame, geometry.frame(in: .global))
+            }
+            .ignoresSafeArea(edges: .all)
         }
     }
+}
+
+extension EnvironmentValues {
+    @Entry var sceneFrame: CGRect = UIScreen.main.bounds
 }

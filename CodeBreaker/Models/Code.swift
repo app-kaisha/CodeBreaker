@@ -40,7 +40,6 @@ class Code {
         for index in pegs.indices {
             pegs[index] = pegChoices.randomElement() ?? Code.missingPeg
         }
-        print(self)
     }
     
     func reset() {

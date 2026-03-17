@@ -15,14 +15,16 @@ struct PegView: View {
     
     // MARK: - Body
     
-    let pegShape = RoundedRectangle(cornerRadius: 10)
+    //let pegShape = RoundedRectangle(cornerRadius: 10)
+    let pegShape = Diamond()
     
     var body: some View {
         pegShape
             .overlay {
                 if peg == Code.missingPeg {
                     pegShape
-                        .strokeBorder(.gray)
+                        //.strokeBorder(Color.gray)
+                        .stroke(Color.gray)
                 }
             }
             .contentShape(pegShape)
