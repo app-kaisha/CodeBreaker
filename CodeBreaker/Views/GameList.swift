@@ -101,8 +101,8 @@ struct GameList: View {
             addButton
             EditButton() // Edit list of games
         }
-        .onAppear {
-            addSampleGames()
+        .task {
+            await addSampleGames()
         }
     }
     
@@ -165,7 +165,7 @@ struct GameList: View {
         }
     }
     
-    func addSampleGames() {
+    func addSampleGames() async {
         
         //        let fetchDescriptor = FetchDescriptor<CodeBreaker>(
         //            predicate: #Predicate { game in return true }
@@ -180,12 +180,29 @@ struct GameList: View {
         // but as true is the default can be simply:
         let fetchDescriptor = FetchDescriptor<CodeBreaker>()
         if let results = try? modelContext.fetchCount(fetchDescriptor), results == 0 {
-            modelContext.insert(CodeBreaker(name: "Mastermind", pegChoices: [.red, .blue, .green,. yellow]))
-            modelContext.insert(CodeBreaker(name: "Earth Tones",pegChoices: [.orange, .brown, .black,. yellow, .green]))
-            modelContext.insert(CodeBreaker(name: "Undersea",pegChoices: [.blue, .indigo,. cyan]))
+            //            modelContext.insert(CodeBreaker(name: "Mastermind", pegChoices: [.red, .blue, .green,. yellow]))
+            //            modelContext.insert(CodeBreaker(name: "Earth Tones",pegChoices: [.orange, .brown, .black,. yellow, .green]))
+            //            modelContext.insert(CodeBreaker(name: "Undersea",pegChoices: [.blue, .indigo,. cyan]))
+            
+            for url in sampleGameURLs {
+                do {
+                    let (json, _) = try await URLSession.shared.data(from: url)
+                    let game = try JSONDecoder().decode(CodeBreaker.self, from: json)
+                    modelContext.insert(game)
+                    print("loaded sample game from \(url)")
+                } catch {
+                    print("Couldn't load sample game from json file at \(url): \(error.localizedDescription) ")
+                }
+            }
         }
         
-        
+    }
+    
+    var sampleGameURLs: [URL] {
+        // Search everywhere in bundle and return array oif urls
+        Bundle.main.paths(forResourcesOfType: "json", inDirectory: nil)
+        // TODO: Deprecated - need to implement newer method top trun string to url
+            .map { URL(fileURLWithPath: $0) }
     }
 }
 

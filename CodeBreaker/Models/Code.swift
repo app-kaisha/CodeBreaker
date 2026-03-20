@@ -11,7 +11,7 @@ import SwiftUI
 import SwiftData
 
 @Model
-class Code {
+final class Code {
     
     var _kind: String = Kind.unknown.description
     var kind: Kind {
@@ -19,8 +19,11 @@ class Code {
         set { _kind = newValue.description }
     }
     
-    var pegs: [Peg]
+    var pegs: [Peg] = []
     var timestamp = Date.now
+    var game: CodeBreaker?
+    
+    init() {}
     
     init(kind: Kind, pegs: [Peg] = Array(repeating: Code.missingPeg, count: 4)) {
         self.pegs = pegs

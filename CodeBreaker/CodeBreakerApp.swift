@@ -22,6 +22,11 @@ struct CodeBreakerApp: App {
             .ignoresSafeArea(edges: .all)
         }
     }
+    
+    // get path of swiftData in simulator
+    init() {
+        print(URL.applicationSupportDirectory.path(percentEncoded: false))
+    }
 }
 
 extension EnvironmentValues {
